@@ -31,7 +31,8 @@ jobs:
 
       - name: Run ESLint with SARIF output
         run: |
-          npx eslint . \
+          npx eslint "**/*.{js,mjs,cjs,jsx}" \
+            --config ./eslint.config.js \
             --ext .js,.mjs,.cjs,.jsx \
             --format @microsoft/eslint-formatter-sarif \
             --output-file reports/eslint-results.sarif \
