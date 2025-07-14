@@ -2,6 +2,10 @@ name: ESLint Code Analysis
 
 on: [push, pull_request]
 
+permissions:
+  contents: read          # keep the defaults you need
+  security-events: write  # <-- allow uploading SARIF
+
 jobs:
   eslint:
     runs-on: ubuntu-latest
