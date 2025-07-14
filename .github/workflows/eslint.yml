@@ -30,14 +30,20 @@ jobs:
         run: npm install @microsoft/eslint-formatter-sarif --save-dev
 
       - name: Run ESLint with SARIF output
-        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif || true
+        run: |
+          npx eslint . \
+            --ext .js,.mjs,.cjs,.jsx \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file reports/eslint-results.sarif \
+            || true
 
 
       - name: Debug SARIF file
         run: |
+          ls -R.
+          ls -R reports || echo "(no such directory)"
           if [ -f reports/eslint-results.sarif ]; then
             echo "✅ SARIF generated:"
-            cat reports/eslint-results.sarif
           else
             echo "❌ reports/eslint-results.sarif not found"
             exit 1
