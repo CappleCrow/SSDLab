@@ -40,7 +40,7 @@ jobs:
 
       - name: Debug SARIF file
         run: |
-          ls -R.
+          ls -R .
           ls -R reports || echo "(no such directory)"
           if [ -f reports/eslint-results.sarif ]; then
             echo "✅ SARIF generated:"
