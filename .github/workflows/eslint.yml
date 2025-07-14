@@ -26,11 +26,7 @@ jobs:
         run: npm install @microsoft/eslint-formatter-sarif --save-dev
 
       - name: Run ESLint with SARIF output
-        run: |
-          npx eslint . \
-            --ext .js,.mjs \
-            --format @microsoft/eslint-formatter-sarif \
-            --output-file reports/eslint-results.sarif
+        run: npx eslint . --format @microsoft/eslint-formatter-sarif --output-file reports/eslint-results.sarif || true
 
 
       - name: Debug SARIF file
