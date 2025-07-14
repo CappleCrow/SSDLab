@@ -32,12 +32,14 @@ jobs:
             --format @microsoft/eslint-formatter-sarif \
             --output-file reports/eslint-results.sarif
 
-      - name: Debug ESLint Output
+
+      - name: Debug SARIF file
         run: |
           if [ -f reports/eslint-results.sarif ]; then
+            echo "✅ SARIF generated:"
             cat reports/eslint-results.sarif
           else
-            echo "❌ No SARIF report generated"
+            echo "❌ reports/eslint-results.sarif not found"
             exit 1
           fi
 
