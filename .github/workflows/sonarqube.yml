@@ -9,24 +9,25 @@ on:
       - main
 
 jobs:
-  sonarqube:
-    name: Analyze with SonarQube
-    runs-on: ubuntu-latest
-
+  sonar:
+    runs-on: [self-hosted]      # must match your self-hosted runner label
+    env:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      - name: Install SonarScanner
+        run: |
+          curl -sSL -o scanner.zip \
+            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.1.0.4889-linux.zip
+          unzip scanner.zip -d $RUNNER_TEMP
+          echo "$RUNNER_TEMP/sonar-scanner-*/bin" >> $GITHUB_PATH
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@master
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Run SonarQube analysis
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=your-project-key \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$SONAR_TOKEN
