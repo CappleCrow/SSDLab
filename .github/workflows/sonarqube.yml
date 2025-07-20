@@ -23,23 +23,19 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Wait for SonarQube to be ready
+      - name: Wait for SonarQube
         run: |
-          for i in {1..30}; do
-            if curl -sSf http://localhost:9000/api/server/version; then
-              echo "✅ SonarQube is up!"
-              break
-            fi
-            echo "⌛ Waiting for SonarQube… ($i)"
+          until curl -sSf http://localhost:9000/api/server/version; do
+            echo "Waiting for SonarQube…"
             sleep 5
           done
 
-      - name: Run SonarScanner
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          args: >
+            -Dsonar.projectKey=your-project-key
+            -Dsonar.sources=.
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=your‑project‑key \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=$SONAR_TOKEN
+          SONAR_HOST_URL: http://localhost:9000
