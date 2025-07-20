@@ -29,9 +29,18 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Install SonarScanner CLI
+        run: |
+          curl -sSL \
+            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip \
+            -o scanner.zip
+          unzip scanner.zip -d scanner
+          echo "${{ runner.workspace }}/scanner/sonar-scanner-*/bin" >> $GITHUB_PATH
+
       - name: Wait for SonarQube
         run: |
           until curl -sSf http://localhost:9000/api/server/version; do
+            echo "…waiting for SonarQube"
             sleep 5
           done
 
