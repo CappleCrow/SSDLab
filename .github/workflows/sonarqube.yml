@@ -9,7 +9,7 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: ubuntu-latest      # ← switch back to Linux
+    runs-on: [self-hosted, windows]  
     steps:
       - uses: actions/checkout@v4
       - name: Set up Java 17
