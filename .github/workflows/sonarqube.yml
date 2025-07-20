@@ -27,7 +27,7 @@ jobs:
           java-version: '17'
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v4.1.0
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # should be http://localhost:9000
