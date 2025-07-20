@@ -9,34 +9,21 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: [self-hosted, windows]
-
+    runs-on: ubuntu-latest      # ← switch back to Linux
     steps:
       - uses: actions/checkout@v4
-
       - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Download SonarScanner for Windows
-        run: |
-          curl.exe -L -o scanner.zip ^
-            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-7.1.0.4889-windows.zip
-          tar -xf scanner.zip
-
-      - name: Add scanner to PATH
-        run: |
-          echo "%{RUNNER_WORKSPACE}\sonar-scanner-*/bin" >> $env:GITHUB_PATH
-
-      - name: Run SonarScanner
-        run: |
-          sonar-scanner.bat ^
-            -Dsonar.projectKey=your-project-key ^
-            -Dsonar.sources=. ^
-            -Dsonar.host.url=%SONAR_HOST_URL% ^
-            -Dsonar.login=%SONAR_TOKEN%
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=your-project-key
+            -Dsonar.sources=.
