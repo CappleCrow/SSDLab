@@ -1,15 +1,13 @@
 name: SonarQube Analysis
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  push:         { branches: [ main ] }
+  pull_request: { branches: [ main ] }
   workflow_dispatch:
 
 jobs:
   sonarqube:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest   # or [self‑hosted, linux]
 
     services:
       sonarqube:
@@ -17,8 +15,7 @@ jobs:
         ports: ["9000:9000"]
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
       - name: Set up Java 17
         uses: actions/setup-java@v3
@@ -26,29 +23,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Install SonarScanner CLI
+      - name: Download & install SonarScanner CLI
         run: |
           curl -sSL \
             https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip \
-            -o sonar-scanner.zip
-          unzip sonar-scanner.zip -d scanner
-          echo "${{ runner.workspace }}/scanner/sonar-scanner-*/bin" >> $GITHUB_PATH
+            -o $RUNNER_TEMP/sonar-scanner.zip
+          unzip -q $RUNNER_TEMP/sonar-scanner.zip -d $RUNNER_TEMP
+          echo "$RUNNER_TEMP/sonar-scanner-*/bin" >> $GITHUB_PATH
 
-      - name: Wait for SonarQube to be ready
+      - name: Wait for SonarQube
         run: |
-          for i in {1..30}; do
-            if curl -sSf http://localhost:9000/api/server/version; then
-              echo "SonarQube is up!"
-              break
-            fi
-            echo "Waiting for SonarQube… ($i)"
+          until curl -sSf http://localhost:9000/api/server/version; do
+            echo "Waiting for SonarQube…"
             sleep 5
           done
 
       - name: Run SonarScanner
         run: |
           sonar-scanner \
-            -Dsonar.projectKey=your‑project‑key \
+            -Dsonar.projectKey=your-project-key \
             -Dsonar.sources=. \
-            -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }}
+            -Dsonar.host.url=http://localhost:9000 \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
