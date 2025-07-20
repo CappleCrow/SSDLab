@@ -7,7 +7,7 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: ubuntu-latest   # or [self‑hosted, linux]
+    runs-on: ubuntu-latest
 
     services:
       sonarqube:
@@ -23,27 +23,24 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Download & install SonarScanner CLI
+      - name: Wait for SonarQube to be ready
         run: |
-          curl -sSL \
-            https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.8.0.2856-linux.zip \
-            -o $RUNNER_TEMP/sonar-scanner.zip
-          unzip -q $RUNNER_TEMP/sonar-scanner.zip -d $RUNNER_TEMP
-          echo "$RUNNER_TEMP/sonar-scanner-*/bin" >> $GITHUB_PATH
-
-      - name: Wait for SonarQube
-        run: |
-          until curl -sSf http://localhost:9000/api/server/version; do
-            echo "Waiting for SonarQube…"
+          for i in {1..30}; do
+            if curl -sSf http://localhost:9000/api/server/version; then
+              echo "✅ SonarQube is up!"
+              break
+            fi
+            echo "⌛ Waiting for SonarQube… ($i)"
             sleep 5
           done
 
-      - name: Run SonarScanner
-        run: |
-          sonar-scanner \
-            -Dsonar.projectKey=your-project-key \
-            -Dsonar.sources=. \
-            -Dsonar.host.url=http://localhost:9000 \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      - name: Run SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          # these args go straight to sonar-scanner
+          args: >
+            -Dsonar.projectKey=your-project-key
+            -Dsonar.sources=.
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: http://localhost:9000
+          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
