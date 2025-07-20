@@ -34,7 +34,7 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5
         with:
           args: >
-            -Dsonar.projectKey=your-project-key
+            -Dsonar.projectKey=github-test-scan
             -Dsonar.sources=.
         env:
           SONAR_HOST_URL: http://localhost:9000
