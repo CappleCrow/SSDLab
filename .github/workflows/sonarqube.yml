@@ -31,11 +31,11 @@ jobs:
           done
 
       - name: Run SonarQube scan
-          uses: SonarSource/sonarqube-scan-action@v5
-          with:
-            args: >
-              -Dsonar.projectKey=your-project-key
-              -Dsonar.sources=.
-          env:
-            SONAR_HOST_URL: http://localhost:9000
-            SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v5
+        with:
+          args: >
+            -Dsonar.projectKey=your-project-key
+            -Dsonar.sources=.
+        env:
+          SONAR_HOST_URL: http://localhost:9000
+          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
