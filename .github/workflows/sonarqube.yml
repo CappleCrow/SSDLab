@@ -8,7 +8,7 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: [self-hosted, windows, sonar]  # match labels you set
+    runs-on: [self-hosted, windows, X64]  # match labels you set
     steps:
       - uses: actions/checkout@v4
         with:
