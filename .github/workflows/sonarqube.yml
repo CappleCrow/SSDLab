@@ -36,7 +36,7 @@ jobs:
           args: >
             -Dsonar.projectKey=github-test-scan
             -Dsonar.sources=.
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
         env:
           SONAR_HOST_URL: http://localhost:9000
-          SONAR_TOKEN:    ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN:    ${{ secrets.SONARQUBE_TOKEN }}

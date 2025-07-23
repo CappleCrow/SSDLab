@@ -2,5 +2,5 @@ projectKey=Sample-ReactJS
 serverUrl=http://localhost:9000
 serverVersion=25.6.0.109173
 dashboardUrl=http://localhost:9000/dashboard?id=Sample-ReactJS
-ceTaskId=0036dce6-9add-49b7-926b-8df67ad23d5f
-ceTaskUrl=http://localhost:9000/api/ce/task?id=0036dce6-9add-49b7-926b-8df67ad23d5f
+ceTaskId=7d17757f-6a8b-4a19-9f26-58cb83c17187
+ceTaskUrl=http://localhost:9000/api/ce/task?id=7d17757f-6a8b-4a19-9f26-58cb83c17187
