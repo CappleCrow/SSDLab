@@ -8,31 +8,52 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: [self-hosted, windows, X64]  # match labels you set
+    runs-on: [self-hosted, windows, X64]   # match your runner labels
+
+    env:
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # e.g. http://localhost:9000
+      SONAR_TOKEN:     ${{ secrets.SONARQUBE_TOKEN }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
+      - name: Install Chocolatey (if missing)
+        shell: powershell
+        run: |
+          if (!(Get-Command choco.exe -ErrorAction SilentlyContinue)) {
+            Set-ExecutionPolicy Bypass -Scope Process -Force
+            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
+            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+          }
 
-      - run: npm ci
+      - name: Install Node 18
+        shell: powershell
+        run: |
+          choco install nodejs-lts --version=18.20.8 -y --no-progress
+          $env:Path += ";C:\ProgramData\chocolatey\bin"
+          node -v
+          npm -v
+
+      - name: Install project dependencies
+        shell: powershell
+        run: npm ci
 
       - name: Check SonarQube connectivity
         shell: powershell
         run: |
-          $resp = Invoke-WebRequest "$env:SONAR_HOST_URL/api/system/health" -UseBasicParsing
+          $url = "$env:SONAR_HOST_URL/api/system/health"
+          Write-Host "Checking $url"
+          $resp = Invoke-WebRequest $url -UseBasicParsing
           Write-Host $resp.Content
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
 
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2.3.0
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
-          SONAR_TOKEN:     ${{ secrets.SONARQUBE_TOKEN }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+          SONAR_TOKEN:     ${{ env.SONAR_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=SSD-Lab
