@@ -8,10 +8,10 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: [self-hosted, windows, X64]   # match your runner labels
+    runs-on: [self-hosted, windows, X64]
 
     env:
-      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # e.g. http://localhost:9000
+      SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}      # http://localhost:9000
       SONAR_TOKEN:     ${{ secrets.SONARQUBE_TOKEN }}
 
     defaults:
@@ -19,55 +19,18 @@ jobs:
         shell: powershell -ExecutionPolicy Bypass
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install Chocolatey (if missing)
-        run: |
-          if (!(Get-Command choco.exe -ErrorAction SilentlyContinue)) {
-            [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
-            Invoke-Expression ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-          }
-
-      - name: Install Node 18
-        run: |
-          choco install nodejs-lts --version=18.20.8 -y --no-progress
-          $env:Path += ";C:\ProgramData\chocolatey\bin"
-          node -v
-          npm -v
-
-      - name: Install Java 17 (required by SonarScanner)
-        run: |
-          choco install temurin17-jdk -y --no-progress
-          $env:Path += ";C:\Program Files\Eclipse Adoptium\jdk-17*\bin"
-          java -version
-
-      - name: Download & extract SonarScanner CLI
-        run: |
-          $ver = "5.0.1.3006"
-          $zip = "sonar-scanner-$ver-windows.zip"
-          Invoke-WebRequest "https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/$zip" -OutFile $zip
-          Expand-Archive $zip -DestinationPath "$PWD\scanner" -Force
-          $scannerBin = (Get-ChildItem "$PWD\scanner" -Recurse -Filter sonar-scanner.bat).DirectoryName
-          echo "Scanner bin: $scannerBin"
-          echo "$scannerBin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
-          sonar-scanner.bat -v
-
-      - name: Check SonarQube connectivity
-        run: |
-          $pair=":$env:SONAR_TOKEN"
-          $b64=[Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes($pair))
-          $hdrs=@{Authorization="Basic $b64"}
-          $url="$env:SONAR_HOST_URL/api/system/health"
-          $resp=Invoke-WebRequest $url -Headers $hdrs -UseBasicParsing
-          Write-Host $resp.Content
+      # If Node/Java/Scanner not preinstalled, keep the install steps you used before.
+      # (Chocolatey Node, Temurin 17, download scanner, etc.)
 
       - name: Run SonarScanner
         run: |
           sonar-scanner.bat `
-            -Dsonar.host.url=$env:SONAR_HOST_URL `
-            -Dsonar.login=$env:SONAR_TOKEN `
             -Dsonar.projectKey=SSD-Lab `
-            -Dsonar.sources=.
+            -Dsonar.sources=. `
+            -Dsonar.host.url=$env:SONAR_HOST_URL `
+            -Dsonar.token=$env:SONAR_TOKEN
