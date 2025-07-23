@@ -28,6 +28,7 @@ jobs:
       # (Chocolatey Node, Temurin 17, download scanner, etc.)
 
       - name: Run SonarScanner
+        shell: cmd 
         run: |
           sonar-scanner.bat `
             -Dsonar.projectKey=SSD-Lab `
