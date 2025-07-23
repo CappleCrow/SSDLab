@@ -8,12 +8,11 @@ on:
 
 jobs:
   sonarqube:
-    runs-on: ubuntu-latest
-
+    runs-on: [self-hosted, windows, sonar]  # match labels you set
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # needed for blame/branch info
+          fetch-depth: 0
 
       - uses: actions/setup-node@v4
         with:
@@ -21,13 +20,20 @@ jobs:
 
       - run: npm ci
 
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2.3.0   # <-- pin a version
+      - name: Check SonarQube connectivity
+        shell: powershell
+        run: |
+          $resp = Invoke-WebRequest "$env:SONAR_HOST_URL/api/system/health" -UseBasicParsing
+          Write-Host $resp.Content
         env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # e.g. https://sonar.yourdomain.com
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2.3.0
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # http://localhost:9000
           SONAR_TOKEN:     ${{ secrets.SONARQUBE_TOKEN }}
         with:
           args: >
             -Dsonar.projectKey=SSD-Lab
-            -Dsonar.projectName=SSD-Lab
             -Dsonar.sources=.
