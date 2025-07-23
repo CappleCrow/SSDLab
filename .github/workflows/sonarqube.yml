@@ -40,15 +40,7 @@ jobs:
       - name: Install project dependencies
         shell: powershell
         run: npm ci
-
-      - name: Check SonarQube connectivity
-        shell: powershell
-        run: |
-          $url = "$env:SONAR_HOST_URL/api/system/health"
-          Write-Host "Checking $url"
-          $resp = Invoke-WebRequest $url -UseBasicParsing
-          Write-Host $resp.Content
-
+        
       - name: SonarQube Scan
         uses: sonarsource/sonarqube-scan-action@v2.3.0
         env:
